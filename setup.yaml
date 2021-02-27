@@ -1,0 +1,75 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greeting-benelux
+  labels:
+    app: greeting-benelux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: greeting-benelux
+  template:
+    metadata:
+      labels:
+        app: greeting-benelux
+      annotations:
+        prometheus.io/scrape: "true"
+    spec:
+      containers:
+        - name: greeting-benelux
+          image: ammbra/greeting:0.0.22
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+            - name: prometheus-jmx
+              containerPort: 9099
+          env:
+          - name: REGION
+            value: benelux
+          - name: JAEGER_SERVICE_NAME
+            value: greeting
+          - name: JAEGER_AGENT_HOST
+            value: jaeger-agent
+          - name: JAEGER_SAMPLER_TYPE
+            value: const
+          - name: JAEGER_SAMPLER_PARAM
+            value: "1"
+          - name: JAEGER_REPORTER_LOG_SPANS
+            value: "true"
+          - name: JAEGER_TAGS
+            value: "version=${VERSION}"
+          - name: OPENTRACING_METRICS_EXPORTER_HTTP_PATH
+            value: "/q/metrics"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: greeting-benelux-service
+  labels:
+    app: greeting-benelux
+spec:
+  type: LoadBalancer
+  selector:
+    app: greeting-benelux
+  ports:
+    - protocol: TCP
+      name: http-traffic
+      port: 9080
+      targetPort: 8080
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: greeting-benelux-service-monitor
+spec:
+  selector:
+    matchLabels:
+      app: greeting-benelux
+  endpoints:
+    - port: http-traffic
+      path: "/q/metrics"

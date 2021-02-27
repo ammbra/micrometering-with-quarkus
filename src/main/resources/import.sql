@@ -1,0 +1,1 @@
+INSERT INTO message (id, content, locale) VALUES (1000, 'bonjour','fr');
