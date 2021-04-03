@@ -23,13 +23,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Path("/api/v1")
 public class ExampleEndpoint {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExampleEndpoint.class);
     public static final String URI = "uri";
     public static final String API_GREET = "api.greet";
     public static final String EMPTY = "empty";
     public static final String CUSTOM_API_GREET = "custom.api.greet";
     public static final String LANGUAGE = "language";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExampleEndpoint.class);
     @Inject
     protected PrometheusMeterRegistry registry;
 
@@ -43,12 +42,32 @@ public class ExampleEndpoint {
 
     @PostConstruct
     protected void init() {
+        this.dynamicTaggedCounter = new DynamicTaggedCounter("another.requests.count", CUSTOM_API_GREET, registry);
         this.dynamicTaggedTimer = new DynamicTaggedTimer("another.requests.duration", CUSTOM_API_GREET, registry);
         this.dynamicMultiTaggedTimer = new DynamicMultiTaggedTimer("other.requests.duration", registry, LANGUAGE, CUSTOM_API_GREET);
-        this.dynamicTaggedCounter = new DynamicTaggedCounter("another.requests.count", CUSTOM_API_GREET, registry);
         this.dynamicMultiTaggedCounter = new DynamicMultiTaggedCounter("other.requests", registry, LANGUAGE, CUSTOM_API_GREET);
     }
 
+    @GET
+    @Path("find")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Timed(value = "greetings.all", longTask = true, extraTags = {URI, API_GREET})
+    @Counted(value = "http.get.requests", extraTags = {URI, API_GREET})
+    public List<Message> findAll() {
+        return messageService.findAll();
+    }
+
+    @GET
+    @Path("find/{languageTag}")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Timed(value = "greetings.lang", longTask = true, extraTags = {URI, API_GREET})
+    @Counted(value = "http.get.lang.requests", extraTags = {URI, API_GREET})
+    public List<Message> filterGreetings(@PathParam("languageTag") String languageTag) {
+        AtomicReference<List<Message>> messages = new AtomicReference<>();
+        var locale = Locale.forLanguageTag(languageTag);
+        dynamicTaggedTimer.decorate(languageTag).record(() -> messages.set(messageService.filterMessages(locale)));
+        return messages.get();
+    }
 
     @PUT
     @Path("make/{languageTag}/{content}")
@@ -59,11 +78,11 @@ public class ExampleEndpoint {
     public String generateGreeting(@PathParam("languageTag") String languageTag, @PathParam("content") String content) {
         Locale locale = Locale.forLanguageTag(languageTag);
         MessageDTO dto = new MessageDTO(locale, content);
-        if (Math.random() > 0.8) {
-            String exceptionalTag = "exceptional" + content;
+        if ( Math.random() > 0.8 ) {
+            var exceptionalTag = "exceptional" + content;
             dynamicMultiTaggedTimer.decorate(languageTag, exceptionalTag).record(() -> {
                 try {
-                    Thread.sleep(1 + (long)(Math.random()*500));
+                    Thread.sleep(1 + (long) (Math.random() * 500));
                 } catch (InterruptedException e) {
                     LOGGER.error("Error occured during long running operation ", e);
                 }
@@ -72,6 +91,7 @@ public class ExampleEndpoint {
         } else {
             dynamicMultiTaggedCounter.increment(languageTag, content);
         }
+
         messageService.createMessage(dto);
         return content;
     }
@@ -83,13 +103,13 @@ public class ExampleEndpoint {
     @Counted(value = "http.get.specific.requests", extraTags = {URI, API_GREET})
     public List<Message> findGreetings(@PathParam("content") String content) {
         AtomicReference<List<Message>> messages = new AtomicReference<>();
-        if (!content.isEmpty()) {
+        if ( !content.isEmpty() ) {
             dynamicTaggedTimer.decorate(content).record(() -> {
                 List<Message> greetings = messageService.findMessages(content);
                 messages.set(greetings);
             });
         }
-        if (messages.get().size() > 0) {
+        if ( messages.get().size() > 0 ) {
             dynamicTaggedCounter.increment(content);
         } else {
             dynamicTaggedCounter.increment(EMPTY);
@@ -97,24 +117,5 @@ public class ExampleEndpoint {
         return messages.get();
     }
 
-    @GET
-    @Path("find/{languageTag}")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Timed(value = "greetings.lang", longTask = true, extraTags = {URI, API_GREET})
-    @Counted(value = "http.get.lang.requests", extraTags = {URI, API_GREET})
-    public List<Message> filterGreetings(@PathParam("languageTag") String languageTag) {
-        AtomicReference<List<Message>> messages = new AtomicReference<>();
-        Locale locale = Locale.forLanguageTag(languageTag);
-        dynamicTaggedTimer.decorate(languageTag).record(() -> messages.set(messageService.filterMessages(locale)));
-        return messages.get();
-    }
 
-    @GET
-    @Path("find")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Timed(value = "greetings.all", longTask = true, extraTags = {URI, API_GREET})
-    @Counted(value = "http.get.requests", extraTags = {URI, API_GREET})
-    public List<Message> findAll() {
-        return messageService.findAll();
-    }
 }

@@ -2,23 +2,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: greeting-benelux
+  name: greeting-dach
+  namespace: monitoring
   labels:
-    app: greeting-benelux
+    app: greeting-dach
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: greeting-benelux
+      app: greeting-dach
   template:
     metadata:
       labels:
-        app: greeting-benelux
+        app: greeting-dach
       annotations:
         prometheus.io/scrape: "true"
     spec:
       containers:
-        - name: greeting-benelux
+        - name: greeting-dach
           image: ammbra/greeting:0.0.22
           imagePullPolicy: IfNotPresent
           ports:
@@ -28,19 +29,7 @@ spec:
               containerPort: 9099
           env:
           - name: REGION
-            value: benelux
-          - name: JAEGER_SERVICE_NAME
-            value: greeting
-          - name: JAEGER_AGENT_HOST
-            value: jaeger-agent
-          - name: JAEGER_SAMPLER_TYPE
-            value: const
-          - name: JAEGER_SAMPLER_PARAM
-            value: "1"
-          - name: JAEGER_REPORTER_LOG_SPANS
-            value: "true"
-          - name: JAEGER_TAGS
-            value: "version=${VERSION}"
+            value: dach
           - name: OPENTRACING_METRICS_EXPORTER_HTTP_PATH
             value: "/q/metrics"
 
@@ -48,13 +37,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: greeting-benelux-service
+  name: greeting-dach-service
+  namespace: monitoring
   labels:
-    app: greeting-benelux
+    app: greeting-dach
 spec:
   type: LoadBalancer
   selector:
-    app: greeting-benelux
+    app: greeting-dach
   ports:
     - protocol: TCP
       name: http-traffic
@@ -65,11 +55,12 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: greeting-benelux-service-monitor
+  name: greeting-dach-service-monitor
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
-      app: greeting-benelux
+      app: greeting-dach
   endpoints:
     - port: http-traffic
       path: "/q/metrics"
