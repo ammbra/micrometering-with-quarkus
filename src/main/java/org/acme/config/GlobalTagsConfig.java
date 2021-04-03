@@ -1,6 +1,9 @@
 package org.acme.config;
 
 import io.quarkus.arc.config.ConfigProperties;
+import io.quarkus.runtime.configuration.ProfileManager;
+
+import javax.resource.spi.ConfigProperty;
 
 @ConfigProperties(prefix = "global")
 public class GlobalTagsConfig {
