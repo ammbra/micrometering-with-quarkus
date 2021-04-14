@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: greeting-dach
-          image: ammbra/greeting:0.0.22
+          image: ammbra/techflow:0.0.1
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

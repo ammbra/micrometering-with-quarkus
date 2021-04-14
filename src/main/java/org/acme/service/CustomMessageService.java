@@ -60,4 +60,11 @@ public class CustomMessageService {
         }
         return messages;
     }
+
+    public List<Message> search(List<String> content) {
+        TypedQuery<Message> query = em.createQuery(
+                "SELECT m from Message m WHERE m.content in :content", Message.class).
+                setParameter("content", content);
+        return query.getResultList();
+    }
 }

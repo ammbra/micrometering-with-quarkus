@@ -2,6 +2,8 @@ package org.acme.endpoint;
 
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.Timer;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
 import org.acme.dto.MessageDTO;
 import org.acme.metric.counter.DynamicMultiTaggedCounter;
@@ -17,6 +19,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,7 +61,7 @@ public class ExampleEndpoint {
     }
 
     @GET
-    @Path("find/{languageTag}")
+    @Path("detect/{languageTag}")
     @Produces(MediaType.TEXT_PLAIN)
     @Timed(value = "greetings.lang", longTask = true, extraTags = {URI, API_GREET})
     @Counted(value = "http.get.lang.requests", extraTags = {URI, API_GREET})
@@ -115,6 +118,19 @@ public class ExampleEndpoint {
             dynamicTaggedCounter.increment(EMPTY);
         }
         return messages.get();
+    }
+
+    @GET
+    @Path("search")
+    @Produces(MediaType.TEXT_PLAIN)
+    public List<Message> search(@QueryParam("content") String content) {
+        Timer.Sample sample = Timer.start(registry);
+        List<String> input = Arrays.asList(content.split(","));
+        DistributionSummary.builder("onsearch.request").scale(100).serviceLevelObjectives(50, 75, 90, 95).publishPercentiles()
+                .publishPercentileHistogram().tag("content", input.toString()).register(registry).record(input.size());
+        List<Message> messages = messageService.search(input);
+        sample.stop(registry.timer("onsearch.request.timer", "content", input.toString()));
+        return messages;
     }
 
 
