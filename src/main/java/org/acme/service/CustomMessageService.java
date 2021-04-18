@@ -1,9 +1,9 @@
 package org.acme.service;
 
 import io.micrometer.core.annotation.Counted;
-import io.micrometer.core.annotation.Timed;
 import org.acme.dto.MessageDTO;
 import org.acme.model.Message;
+import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public class CustomMessageService {
         return query.getResultList();
     }
 
-    @Timed(value = "database.calls.filter", longTask = true, extraTags = {"db", "language"})
+    @SimplyTimed(name = "database.calls.filter", tags = {"db", "language"})
     public List<Message> filterMessages(Locale locale) {
         TypedQuery<Message> query = em.createQuery(
                 "SELECT m from Message m WHERE m.locale = :locale", Message.class).

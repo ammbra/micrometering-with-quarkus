@@ -2,25 +2,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: greeting-dach
+  name: greeting-benelux
   namespace: monitoring
   labels:
-    app: greeting-dach
+    app: greeting-benelux
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: greeting-dach
+      app: greeting-benelux
   template:
     metadata:
       labels:
-        app: greeting-dach
+        app: greeting-benelux
       annotations:
         prometheus.io/scrape: "true"
     spec:
       containers:
-        - name: greeting-dach
-          image: ammbra/techflow:0.0.1
+        - name: greeting-benelux
+          image: ammbra/greeting:0.0.23
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -29,22 +29,28 @@ spec:
               containerPort: 9099
           env:
           - name: REGION
-            value: dach
+            value: benelux
           - name: OPENTRACING_METRICS_EXPORTER_HTTP_PATH
             value: "/q/metrics"
-
+          resources:
+            limits:
+              cpu: '1'
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: greeting-dach-service
+  name: greeting-benelux-service
   namespace: monitoring
   labels:
-    app: greeting-dach
+    app: greeting-benelux
 spec:
   type: LoadBalancer
   selector:
-    app: greeting-dach
+    app: greeting-benelux
   ports:
     - protocol: TCP
       name: http-traffic
@@ -55,12 +61,12 @@ spec:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: greeting-dach-service-monitor
+  name: greeting-benelux-service-monitor
   namespace: monitoring
 spec:
   selector:
     matchLabels:
-      app: greeting-dach
+      app: greeting-benelux
   endpoints:
     - port: http-traffic
       path: "/q/metrics"
