@@ -64,8 +64,6 @@ public class ExampleEndpoint {
     @GET
     @Path("detect/{languageTag}")
     @Produces(MediaType.TEXT_PLAIN)
-//    @Timed(value = "greetings.lang", longTask = true, extraTags = {URI, API_GREET})
-//    @Counted(value = "http.get.lang.requests", extraTags = {URI, API_GREET})
     @ConcurrentGauge(name = "http.get.lang.requests", tags = {URI, API_GREET})
     public List<Message> filterGreetings(@PathParam("languageTag") String languageTag) {
         AtomicReference<List<Message>> messages = new AtomicReference<>();
