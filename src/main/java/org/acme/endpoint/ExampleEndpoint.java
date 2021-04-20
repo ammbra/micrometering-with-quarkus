@@ -13,6 +13,7 @@ import org.acme.metric.timer.DynamicTaggedTimer;
 import org.acme.model.Message;
 import org.acme.service.CustomMessageService;
 import org.eclipse.microprofile.metrics.annotation.ConcurrentGauge;
+import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,6 @@ public class ExampleEndpoint {
     @GET
     @Path("find")
     @Produces(MediaType.TEXT_PLAIN)
-    @Timed(value = "greetings.all", longTask = true, extraTags = {URI, API_GREET})
     @Counted(value = "http.get.requests", extraTags = {URI, API_GREET})
     public List<Message> findAll() {
         return messageService.findAll();
