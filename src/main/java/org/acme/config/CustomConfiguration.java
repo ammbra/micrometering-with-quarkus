@@ -22,7 +22,7 @@ public class CustomConfiguration {
     public MeterFilter configureAllRegistries() {
         return MeterFilter.commonTags(Arrays.asList(
                 Tag.of(GlobalTagsConfig.PROFILE, ProfileManager.getActiveProfile()),
-                Tag.of(GlobalTagsConfig.REGION, tagsConfig.region)));
+                Tag.of(GlobalTagsConfig.REGION, tagsConfig.region())));
     }
 
     @Produces
@@ -31,9 +31,10 @@ public class CustomConfiguration {
         return new MeterFilter() {
             @Override
             public Meter.Id map(Meter.Id id) {
-                if(id.getName().startsWith(tagsConfig.customMeter)) {
-                    return id.withName(tagsConfig.customMeter+"." + id.getName())
-                            .withTag(new ImmutableTag(tagsConfig.customMeter+".tag", "value"));
+                String prefix = tagsConfig.customMeter();
+                if(id.getName().startsWith(prefix)) {
+                    return id.withName(prefix +"." + id.getName())
+                            .withTag(new ImmutableTag(prefix+".tag", "value"));
                 }
                 return id;
             }

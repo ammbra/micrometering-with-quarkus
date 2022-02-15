@@ -26,7 +26,7 @@ public class CustomMessageService {
     EntityManager em;
 
     @Transactional
-    @Counted(value = "database.calls.add", extraTags = {"db", "language", "db", "content"})
+    @Counted(value = "persistency.calls.add", extraTags = {"db", "language", "db", "content"})
     public void createMessage(MessageDTO dto) {
         Message message = new Message();
         message.setLocale(dto.getLocale());
@@ -34,7 +34,7 @@ public class CustomMessageService {
         em.persist(message);
     }
 
-    @Counted(value = "database.calls.find", extraTags = {"db", "content"})
+    @Counted(value = "persistency.calls.find", extraTags = {"db", "content"})
     public List<Message> findMessages(String content) {
         TypedQuery<Message> query = em.createQuery(
                 "SELECT m from Message m WHERE m.content = :content", Message.class).
@@ -42,7 +42,7 @@ public class CustomMessageService {
         return query.getResultList();
     }
 
-    @Timed(value = "database.calls.filter", longTask = true, extraTags = {"db", "language"})
+    @Timed(value = "persistency.calls.filter", longTask = true, extraTags = {"db", "language"})
     public List<Message> filterMessages(Locale locale) {
         TypedQuery<Message> query = em.createQuery(
                 "SELECT m from Message m WHERE m.locale = :locale", Message.class).
@@ -50,7 +50,7 @@ public class CustomMessageService {
         return query.getResultList();
     }
 
-    @Counted(value = "database.calls.get", extraTags = {"db", "all"})
+    @Counted(value = "persistency.calls.get", extraTags = {"db", "all"})
     public List<Message> findAll() {
         TypedQuery<Message> query = em.createQuery("SELECT m from Message m", Message.class);
         List<Message> messages = new ArrayList<>();

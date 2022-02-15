@@ -13,7 +13,6 @@ import org.acme.metric.timer.DynamicTaggedTimer;
 import org.acme.model.Message;
 import org.acme.service.CustomMessageService;
 import org.eclipse.microprofile.metrics.annotation.ConcurrentGauge;
-import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
-@Path("/api/v1")
+@Path("api/v1")
 public class ExampleEndpoint {
     public static final String URI = "uri";
     public static final String API_GREET = "api.greet";
@@ -56,7 +55,7 @@ public class ExampleEndpoint {
     @GET
     @Path("find")
     @Produces(MediaType.TEXT_PLAIN)
-    @Counted(value = "http.get.requests", extraTags = {URI, API_GREET})
+    @Counted(value = "get.all.requests", extraTags = {URI, API_GREET})
     public List<Message> findAll() {
         return messageService.findAll();
     }
@@ -64,7 +63,7 @@ public class ExampleEndpoint {
     @GET
     @Path("detect/{languageTag}")
     @Produces(MediaType.TEXT_PLAIN)
-    @ConcurrentGauge(name = "http.get.lang.requests", tags = {URI, API_GREET})
+    @ConcurrentGauge(name = "get.lang.requests", tags = {URI, API_GREET})
     public List<Message> filterGreetings(@PathParam("languageTag") String languageTag) {
         AtomicReference<List<Message>> messages = new AtomicReference<>();
         var locale = Locale.forLanguageTag(languageTag);
@@ -77,7 +76,7 @@ public class ExampleEndpoint {
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
     @Timed(value = "greeting.generator", extraTags = {URI, API_GREET})
-    @Counted(value = "http.put.requests", extraTags = {URI, API_GREET})
+    @Counted(value = "put.requests", extraTags = {URI, API_GREET})
     public String generateGreeting(@PathParam("languageTag") String languageTag, @PathParam("content") String content) {
         Locale locale = Locale.forLanguageTag(languageTag);
         MessageDTO dto = new MessageDTO(locale, content);
@@ -103,13 +102,18 @@ public class ExampleEndpoint {
     @Path("find/{content}")
     @Produces(MediaType.TEXT_PLAIN)
     @Timed(value = "greetings.specific", longTask = true, extraTags = {URI, API_GREET})
-    @Counted(value = "http.get.specific.requests", extraTags = {URI, API_GREET})
+    @Counted(value = "get.specific.requests", extraTags = {URI, API_GREET})
     public List<Message> findGreetings(@PathParam("content") String content) {
         AtomicReference<List<Message>> messages = new AtomicReference<>();
         if ( !content.isEmpty() ) {
             dynamicTaggedTimer.decorate(content).record(() -> {
-                List<Message> greetings = messageService.findMessages(content);
-                messages.set(greetings);
+                try {
+                    Thread.sleep(1 + (long) (Math.random() * 500));
+                    List<Message> greetings = messageService.findMessages(content);
+                    messages.set(greetings);
+                } catch (InterruptedException e) {
+                    LOGGER.error("Error occured during long running operation ", e);
+                }
             });
         }
         if ( messages.get().size() > 0 ) {

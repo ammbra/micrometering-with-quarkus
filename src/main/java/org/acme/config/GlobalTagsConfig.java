@@ -1,16 +1,15 @@
 package org.acme.config;
 
-import io.quarkus.arc.config.ConfigProperties;
-import io.quarkus.runtime.configuration.ProfileManager;
+import io.quarkus.runtime.annotations.StaticInitSafe;
+import io.smallrye.config.ConfigMapping;
 
-import javax.resource.spi.ConfigProperty;
+@StaticInitSafe
+@ConfigMapping(prefix = "global")
+interface GlobalTagsConfig {
 
-@ConfigProperties(prefix = "global")
-public class GlobalTagsConfig {
+   String PROFILE = "profile";
+   String REGION = "region";
 
-    public static final String PROFILE = "profile";
-    public static final String REGION = "region";
-
-    public String region;
-    public String customMeter;
+   String region();
+   String customMeter();
 }
