@@ -45,5 +45,4 @@ You can then execute your native executable with: `./target/micrometering-with-q
 
 !!!!!Before running this to native, you should change the database as H2 database compiled into a native-image is only functional as a client.
 
-
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.

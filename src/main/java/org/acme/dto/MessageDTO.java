@@ -1,5 +1,6 @@
 package org.acme.dto;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,7 @@ import java.util.Locale;
 @Setter
 @ToString
 @AllArgsConstructor
+@RegisterForReflection
 public class MessageDTO {
 
     private Locale locale;
