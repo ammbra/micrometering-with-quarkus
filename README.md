@@ -41,8 +41,8 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
 ```
 
-!!!!!Before running this to native, you should change the database as H2 database compiled into a native-image is only functional as a client.
+You can then execute your native executable with: `./target/micrometering-with-quarkus-1.0.0-SNAPSHOT-runner`.
 
-You can then execute your native executable with: `./target/micrometering-with-quarkus-1.0.0-SNAPSHOT-runner`
+!!!!!Before running this to native, you should change the database as H2 database compiled into a native-image is only functional as a client.
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.html.
