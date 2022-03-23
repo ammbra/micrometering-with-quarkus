@@ -1,5 +1,6 @@
 package org.acme.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,6 +12,7 @@ import java.util.Locale;
 @Setter
 @Entity
 @ToString
+@RegisterForReflection
 public class Message {
     @Id
     @SequenceGenerator(name = "messageSeq", sequenceName = "message_id_seq", allocationSize = 1, initialValue = 1)
