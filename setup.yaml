@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: greeting-benelux
+  namespace: monitoring
   labels:
     app: greeting-benelux
 spec:
@@ -19,7 +20,7 @@ spec:
     spec:
       containers:
         - name: greeting-benelux
-          image: ammbra/greeting:0.0.22
+          image: ammbra/greeting:0.0.23
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -29,26 +30,21 @@ spec:
           env:
           - name: REGION
             value: benelux
-          - name: JAEGER_SERVICE_NAME
-            value: greeting
-          - name: JAEGER_AGENT_HOST
-            value: jaeger-agent
-          - name: JAEGER_SAMPLER_TYPE
-            value: const
-          - name: JAEGER_SAMPLER_PARAM
-            value: "1"
-          - name: JAEGER_REPORTER_LOG_SPANS
-            value: "true"
-          - name: JAEGER_TAGS
-            value: "version=${VERSION}"
           - name: OPENTRACING_METRICS_EXPORTER_HTTP_PATH
             value: "/q/metrics"
-
+          resources:
+            limits:
+              cpu: '1'
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: greeting-benelux-service
+  namespace: monitoring
   labels:
     app: greeting-benelux
 spec:
@@ -66,6 +62,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: greeting-benelux-service-monitor
+  namespace: monitoring
 spec:
   selector:
     matchLabels:
