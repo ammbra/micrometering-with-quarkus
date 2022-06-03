@@ -96,7 +96,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum by(region)(rate(database_calls_find_total[5m]))",
+          "expr": "sum by(region)(rate(persistency_calls_find_total[5m]))",
           "interval": "",
           "legendFormat": "",
           "queryType": "randomWalk",
@@ -385,7 +385,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(database_calls_add_total[5m]))",
+          "expr": "sum(rate(persistency_calls_add_total[5m]))",
           "interval": "",
           "legendFormat": "",
           "queryType": "randomWalk",

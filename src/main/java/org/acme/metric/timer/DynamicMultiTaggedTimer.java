@@ -19,7 +19,8 @@ public class DynamicMultiTaggedTimer extends CommonMetricDetails {
     public Timer decorate(String ... tagValues) {
         List<String> adaptedValues = Arrays.asList(tagValues);
         if(adaptedValues.size() != tagNames.size()) {
-            throw new IllegalArgumentException("Timer tag values mismatch the tag names! Expected args are " + tagNames.toString() + ", provided tags are " + adaptedValues);
+            throw new IllegalArgumentException("Timer tag values mismatch the tag names! " +
+                    "Expected args are " + tagNames.toString() + ", provided tags are " + adaptedValues);
         }
         int size = tagNames.size();
         List<Tag> tags = new ArrayList<>(size);

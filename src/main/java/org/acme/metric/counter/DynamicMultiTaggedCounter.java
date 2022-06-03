@@ -20,7 +20,8 @@ public class DynamicMultiTaggedCounter extends CommonMetricDetails {
         List<String> adaptedValues = Arrays.asList(tagValues);
         int size = this.tagNames.size();
         if(adaptedValues.size() != size) {
-            throw new IllegalArgumentException("Counter tag values mismatch the tag names! Expected args are "+ this.tagNames.toString()+", provided tags were "+adaptedValues);
+            throw new IllegalArgumentException("Counter tag values mismatch the tag names! " +
+                    "Expected args are "+ this.tagNames.toString()+", provided tags were "+adaptedValues);
         }
 
         List<Tag> tags = new ArrayList<>(size);

@@ -2,11 +2,9 @@ package org.acme.service;
 
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
+import io.quarkus.logging.Log;
 import org.acme.dto.MessageDTO;
 import org.acme.model.Message;
-import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,7 +18,6 @@ import java.util.Locale;
 
 @ApplicationScoped
 public class CustomMessageService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CustomMessageService.class);
 
     @Inject
     EntityManager em;
@@ -57,7 +54,7 @@ public class CustomMessageService {
         try {
             messages = query.getResultList();
         } catch (NoResultException e) {
-            LOGGER.error("No messages present in the database", e);
+            Log.errorf(e, "No messages present in the database");
         }
         return messages;
     }

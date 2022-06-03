@@ -5,6 +5,7 @@ import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.quarkus.logging.Log;
 import org.acme.dto.MessageDTO;
 import org.acme.metric.counter.DynamicMultiTaggedCounter;
 import org.acme.metric.counter.DynamicTaggedCounter;
@@ -12,9 +13,6 @@ import org.acme.metric.timer.DynamicMultiTaggedTimer;
 import org.acme.metric.timer.DynamicTaggedTimer;
 import org.acme.model.Message;
 import org.acme.service.CustomMessageService;
-import org.eclipse.microprofile.metrics.annotation.ConcurrentGauge;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -32,7 +30,6 @@ public class ExampleEndpoint {
     public static final String EMPTY = "empty";
     public static final String CUSTOM_API_GREET = "custom.api.greet";
     public static final String LANGUAGE = "language";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExampleEndpoint.class);
     @Inject
     protected PrometheusMeterRegistry registry;
 
@@ -63,7 +60,7 @@ public class ExampleEndpoint {
     @GET
     @Path("detect/{languageTag}")
     @Produces(MediaType.TEXT_PLAIN)
-    @ConcurrentGauge(name = "get.lang.requests", tags = {URI, API_GREET})
+    @Counted(value = "get.lang.requests", extraTags = {URI, API_GREET})
     public List<Message> filterGreetings(@PathParam("languageTag") String languageTag) {
         AtomicReference<List<Message>> messages = new AtomicReference<>();
         var locale = Locale.forLanguageTag(languageTag);
@@ -86,7 +83,7 @@ public class ExampleEndpoint {
                 try {
                     Thread.sleep(1 + (long) (Math.random() * 500));
                 } catch (InterruptedException e) {
-                    LOGGER.error("Error occured during long running operation ", e);
+                    Log.errorf(e,"Error occured during long running operation ");
                 }
             });
             dynamicMultiTaggedCounter.increment(languageTag, exceptionalTag);
@@ -112,7 +109,7 @@ public class ExampleEndpoint {
                     List<Message> greetings = messageService.findMessages(content);
                     messages.set(greetings);
                 } catch (InterruptedException e) {
-                    LOGGER.error("Error occured during long running operation ", e);
+                    Log.errorf(e,"Error occured during long running operation");
                 }
             });
         }
