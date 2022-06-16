@@ -51,7 +51,7 @@ oc set volume deployment/prometheus --add --name=prometheus-config --type=config
 
 kubectl patch deployment prometheus \
 --type=json \
--p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--config.file=/etc/prometheus/prometheus.yaml" } ]'
+-p='[{"op": "add", "path": "/spec/template/spec/containers/0/args/-", "value": "--config.file=/etc/prometheus/prometheus.yaml"}]'
 
 oc expose svc prometheus
 ```
